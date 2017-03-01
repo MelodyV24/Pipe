@@ -12,5 +12,14 @@ namespace FBGEMSystem
     /// </summary>
     public partial class App : Application
     {
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+           
+           //  base.OnStartup(e);
+            RealtimeStatus.CHBar ch = new RealtimeStatus.CHBar();
+            ch.Show();
+            // LoginWindow logwindow = new LoginWindow();
+            //logwindow.ShowDialog();
+        }
     }
 }

@@ -34,6 +34,7 @@ namespace FBGEMSystem
 
         //public float[] CH4 = new float[64 * 40];
         public string dateTime = "";
+        public string FBGTime = "";
         private SqlConnection conn;
         //更改为电类传感器类型的三张数据表
         public IDataParameter[] parameters = new IDataParameter[Data.type_Sensor];
@@ -100,7 +101,7 @@ namespace FBGEMSystem
                 CHNum_FBG[1] = Data.FBGCH2;
                 CHNum_FBG[2] = Data.FBGCH3;
                 CHNum_FBG[3] = Data.FBGCH4;
-
+                
                 // Data.Chnum4 = CHNum[3];
 
             }
@@ -116,31 +117,38 @@ namespace FBGEMSystem
             DataTable dt_Vibration = CreateDataTableEle(2);
             //创建FBG内存表
             DataTable dt_FBG = CreateDataTableFBG();
-            //   DataTable dt4 = CreateDataTable(3);
+            //DataTable dt4 = CreateDataTable(3);
             Message_EleDecoded msg_Ele = new Message_EleDecoded();
             Message_FBG msg_FBG = new Message_FBG();
             while (true)
             {
                 try
                 {
-                    msg_Ele = Receiver.sharedLocation_Ele.Buffer;
-                    //msg_FBG = Receiver.sharedLocation_FBG.Buffer;
+                    if(Receiver.sharedLocation_Ele.BufferSize>0)
+                    {
+                        msg_Ele = Receiver.sharedLocation_Ele.Buffer;
 
-                    CH1_Pres = msg_Ele.CH1_Press;
-                    CH2_Temp = msg_Ele.CH2_Temp;
-                    CH3_Vibration = msg_Ele.CH3_Vibration;
+                        CH1_Pres = msg_Ele.CH1_Press;
+                        CH2_Temp = msg_Ele.CH2_Temp;
+                        CH3_Vibration = msg_Ele.CH3_Vibration;
+                        dateTime = msg_Ele.dataTime;
 
-                    //CH1_FBG = msg_FBG.CH1;
-                    //CH2_FBG = msg_FBG.CH2;
-                    //CH3_FBG = msg_FBG.CH3;
-                    //CH4_FBG = msg_FBG.CH4;
+                        RowsCount_Ele = InsertRows_Ele(0, dt_Pres);
+                        InsertRows_Ele(1, dt_Temp);
+                        InsertRows_Ele(2, dt_Vibration);
+                    }
 
-                    dateTime = msg_Ele.dataTime;
-                    RowsCount_Ele = InsertRows_Ele(0, dt_Pres);
-                    InsertRows_Ele(1, dt_Temp);
-                    InsertRows_Ele(2, dt_Vibration);
-
-                    RowsCount_FBG = InsertRows_FBG(dt_FBG);
+                    if (Receiver.sharedLocation_Ele.BufferSize > 0)
+                    {
+                        msg_FBG = Receiver.sharedLocation_FBG.Buffer;
+                        CH1_FBG = msg_FBG.CH1;
+                        CH2_FBG = msg_FBG.CH2;
+                        CH3_FBG = msg_FBG.CH3;
+                        CH4_FBG = msg_FBG.CH4;
+                        FBGTime = msg_FBG.dataTime;
+                        RowsCount_FBG = InsertRows_FBG(dt_FBG);
+                    }
+                    
                     //插入光栅datatable
                     //  InsertRows_FBG(FBGdt);
                     //  InsertRows(3, dt4);
@@ -290,7 +298,7 @@ namespace FBGEMSystem
             {
 
             DataRow row_FBG = FBGdt.NewRow();
-            row_FBG["Time"] = nowTime;
+            row_FBG["Time"] = FBGTime;
 
             for(int k=0;k<Data.FBG_numPackage;k++)
             {
